@@ -1,0 +1,62 @@
+{
+  "name": "@tcx4c70/coc-csharp",
+  "version": "0.0.1",
+  "description": "C# extension for coc.nvim",
+  "author": "Adam Tao <tcx4c70@gmail.com>",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "keywords": [
+    "coc.nvim",
+    "vim",
+    "neovim",
+    "csharp",
+    "roslyn"
+  ],
+  "engines": {
+    "coc": "^0.0.82"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tcx4c70/coc-csharp.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "watch": "node esbuild.mjs --watch",
+    "build": "node esbuild.mjs",
+    "prepare": "node esbuild.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "coc.nvim": "0.0.83-next.18",
+    "esbuild": "^0.19.8",
+    "typescript": "^5.3.3"
+  },
+  "activationEvents": [
+    "onLanguage:csharp",
+    "onLanguage:cs"
+  ],
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "coc-csharp configuration",
+      "properties": {
+        "csharp.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable coc-csharp extension"
+        },
+        "csharp.server.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to roslyn language server (note: need to be the path of the dll file instead of the executable file), e.g.: ~/.roslyn/content/LanguageServer/osx-arm64/Microsoft.CodeAnalysis.LanguageServer.dll"
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "coc-utils": "^0.0.17",
+    "vscode-languageserver-protocol": "^3.17.5"
+  }
+}
