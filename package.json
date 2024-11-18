@@ -51,6 +51,193 @@
           "type": "string",
           "default": "",
           "description": "Path to roslyn language server (note: need to be the path of the dll file instead of the executable file), e.g.: ~/.roslyn/content/LanguageServer/osx-arm64/Microsoft.CodeAnalysis.LanguageServer.dll"
+        },
+        "dotnet.typeMembers.memberInsertionLocation": {
+          "type": "string",
+          "enum": [
+            "withOtherMembersOfTheSameKind",
+            "atTheEnd"
+          ],
+          "default": "withOtherMembersOfTheSameKind",
+          "enumDescriptions": [
+            "Place them with other members of the same kind.",
+            "Place them at the end."
+          ],
+          "description": "The insertion location of properties, events, and methods When implement interface or abstract class."
+        },
+        "dotnet.typeMembers.propertyGenerationBehavior": {
+          "type": "string",
+          "enum": [
+            "preferThrowingProperties",
+            "preferAutoProperties"
+          ],
+          "default": "preferThrowingProperties",
+          "enumDescriptions": [
+            "Prefer throwing properties.",
+            "Prefer auto properties."
+          ],
+          "description": "Generation behavior of properties when implement interface or abstract class."
+        },
+        "dotnet.codeLens.enableReferencesCodeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Specifies whether the references CodeLens should be shown."
+        },
+        "dotnet.codeLens.enableTestsCodeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Specifies whether the run and debug test CodeLens should be shown."
+        },
+        "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables support for showing unimported types and unimported extension methods in completion lists. When committed, the appropriate using directive will be added at the top of the current file."
+        },
+        "dotnet.completion.showNameCompletionSuggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Perform automatic object name completion for the members that you have recently selected."
+        },
+        "dotnet.completion.provideRegexCompletions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show regular expressions in completion list."
+        },
+        "dotnet.completion.triggerCompletionInArgumentLists": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically show completion list in argument lists"
+        },
+        "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": {
+          "type": "string",
+          "enum": [
+            "openFiles",
+            "fullSolution",
+            "none"
+          ],
+          "default": "openFiles",
+          "enumDescriptions": [
+            "Open documents",
+            "Entire solution",
+            "None"
+          ],
+          "description": "Run background code analysis for:"
+        },
+        "dotnet.backgroundAnalysis.compilerDiagnosticsScope": {
+          "type": "string",
+          "enum": [
+            "openFiles",
+            "fullSolution",
+            "none"
+          ],
+          "default": "openFiles",
+          "enumDescriptions": [
+            "Open documents",
+            "Entire solution",
+            "None"
+          ],
+          "description": "Show compiler errors and warnings for:"
+        },
+        "dotnet.highlighting.highlightRelatedRegexComponents": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight related regular expression components under cursor."
+        },
+        "dotnet.highlighting.highlightRelatedJsonComponents": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight related JSON components under cursor."
+        },
+        "csharp.inlayHints.enableInlayHintsForImplicitObjectCreation": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hints for implicit object creation"
+        },
+        "csharp.inlayHints.enableInlayHintsForImplicitVariableTypes": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hints for variables with inferred types"
+        },
+        "csharp.inlayHints.enableInlayHintsForLambdaParameterTypes": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hints for lambda parameter types"
+        },
+        "csharp.inlayHints.enableInlayHintsForTypes": {
+          "type": "boolean",
+          "default": false,
+          "description": "Display inline type hints"
+        },
+        "dotnet.inlayHints.enableInlayHintsForIndexerParameters": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hints for indexers"
+        },
+        "dotnet.inlayHints.enableInlayHintsForLiteralParameters": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hints for literals"
+        },
+        "dotnet.inlayHints.enableInlayHintsForObjectCreationParameters": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hints for 'new' expressions"
+        },
+        "dotnet.inlayHints.enableInlayHintsForOtherParameters": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hints for everything else"
+        },
+        "dotnet.inlayHints.enableInlayHintsForParameters": {
+          "type": "boolean",
+          "default": false,
+          "description": "Display inline parameter name hints"
+        },
+        "dotnet.inlayHints.suppressInlayHintsForParametersThatDifferOnlyBySuffix": {
+          "type": "boolean",
+          "default": false,
+          "description": "Suppress hints when parameter names differ only by suffix"
+        },
+        "dotnet.inlayHints.suppressInlayHintsForParametersThatMatchArgumentName": {
+          "type": "boolean",
+          "default": false,
+          "description": "Suppress hints when argument matches parameter name"
+        },
+        "dotnet.inlayHints.suppressInlayHintsForParametersThatMatchMethodIntent": {
+          "type": "boolean",
+          "default": false,
+          "description": "Suppress hints when parameter name matches the method's intent"
+        },
+        "dotnet.navigation.navigateToDecompiledSources": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable navigation to decomplied sources."
+        },
+        "dotnet.navigation.navigateToSourceLinkAndEmbeddedSources": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable navigation to source link and embedded sources."
+        },
+        "dotnet.quickInfo.showRemarksInQuickInfo": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show remarks information when display symbol."
+        },
+        "dotnet.symbolSearch.searchReferenceAssemblies": {
+          "type": "boolean",
+          "default": true,
+          "description": "Search symbols in reference assemblies. It affects features requires symbol searching, such as add imports."
+        },
+        "dotnet.projects.binaryLogPath": {
+          "scope": "machine-overridable",
+          "type": "string",
+          "default": null,
+          "description": "Sets a path where MSBuild binary logs are written to when loading projects, to help diagnose loading errors."
+        },
+        "dotnet.projects.enableAutomaticRestore": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables automatic NuGet restore if the extension detects assets are missing."
         }
       }
     }
