@@ -11,7 +11,7 @@ Almost all the code is taken from [vscode-csharp](https://github.com/dotnet/vsco
 1. Install [coc.nvim](https://github.com/neoclide/coc.nvim)
 2. Install [.NET SDK](https://dotnet.microsoft.com/download)
 3. Install Roslyn language server
-    1. Navigate to [this feed], search for `Microsoft.CodeAnalysis.LanguageServer` and download the version matching your OS and architecture.
+    1. Navigate to [this feed](https://dev.azure.com/azure-public/vside/_artifacts/feed/vs-impl), search for `Microsoft.CodeAnalysis.LanguageServer` and download the version matching your OS and architecture.
     2. Unzip the downloaded `.nupkg`
     3. (Optional) Copy the contents of `<zip_root>/content/LanguageServer/<your_arch>` to a directory of your choice
     3. Check if it's working by running `dotnet <root_dir>/content/LanguageServer/<your_arch>/Microsoft.CodeAnalysis.LanguageServer.dll --version`
