@@ -26,6 +26,7 @@ import {
 import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
 import { readConfigurations } from './configurationMiddleware';
+import { getRuntimeIdentifier, getLatestVersion, downloadServer } from './downloader';
 
 export class RoslynLanguageServer {
   /**
@@ -179,7 +180,7 @@ export class RoslynLanguageServer {
       throw new Error('Could not find the dotnet executable');
     }
 
-    const serverPath = getServerPath();
+    const serverPath = await getServerPath(context);
     let args: string[] = [ serverPath ];
     args.push(... getArguments(context.storagePath));
     const cpOptions: cp.SpawnOptions = {
@@ -261,11 +262,32 @@ export class RoslynLanguageServer {
   }
 }
 
-function getServerPath(): string {
+function getDownloadedServerPath(context: ExtensionContext): string | undefined {
+  const version = context.globalState.get<string>('roslyn.version');
+  if (!version) {
+    return undefined;
+  }
+
+  const runtime = getRuntimeIdentifier();
+  const serverPath = path.join(context.storagePath, 'roslyn', version, 'content', 'LanguageServer', runtime, 'Microsoft.CodeAnalysis.LanguageServer.dll')
+  return fs.existsSync(serverPath) ? serverPath : undefined;
+}
+
+async function getServerPath(context: ExtensionContext): Promise<string> {
   let serverPath = workspace.getConfiguration('csharp').get<string>('server.path');
   if (!serverPath) {
-    // TODO: Download the package and use the roslyn ls in it if user doesn't configure one. <2024-11-16, Adam Tao> //
-    throw new Error('Please configure the path of the roslyn language server via coc-csharp.roslynServerPath.');
+    let downloadedServerPath = getDownloadedServerPath(context);
+    if (downloadedServerPath) {
+      return downloadedServerPath;
+    }
+
+    const latestVersion = await getLatestVersion();
+    await downloadServer(context, latestVersion);
+    downloadedServerPath = getDownloadedServerPath(context);
+    if (!downloadedServerPath) {
+      throw new Error('Failed to download the roslyn language server');
+    }
+    return downloadedServerPath;
   } else {
     let resolvedPath = workspace.expand(serverPath);
     if (!fs.existsSync(resolvedPath)) {

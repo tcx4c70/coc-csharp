@@ -56,7 +56,7 @@ Almost all the code is taken from [vscode-csharp](https://github.com/dotnet/vsco
 
 ## TODO
 
-- [ ] Download the Roslyn language server automatically
+- [ ] Download the Roslyn language server automatically (Only download once, but will not check for updates now)
 - [ ] Support more LSP extensions from the language server
 - [ ] Add Razor support
 

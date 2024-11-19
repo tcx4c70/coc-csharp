@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.9.0",
+    "@types/node-fetch": "^2.6.12",
     "coc.nvim": "0.0.83-next.18",
     "esbuild": "^0.19.8",
     "typescript": "^5.3.3"
@@ -50,7 +51,7 @@
         "csharp.server.path": {
           "type": "string",
           "default": "",
-          "description": "Path to roslyn language server (note: need to be the path of the dll file instead of the executable file), e.g.: ~/.roslyn/content/LanguageServer/osx-arm64/Microsoft.CodeAnalysis.LanguageServer.dll"
+          "description": "Path to roslyn language server (note: need to be the path of the dll file instead of the executable file), e.g.: ~/.roslyn/content/LanguageServer/osx-arm64/Microsoft.CodeAnalysis.LanguageServer.dll. If it's empty, the extension will download roslyn language server and use it."
         },
         "dotnet.typeMembers.memberInsertionLocation": {
           "type": "string",
@@ -244,6 +245,9 @@
   },
   "dependencies": {
     "coc-utils": "^0.0.17",
+    "detect-libc": "^2.0.3",
+    "node-fetch": "2.7.0",
+    "unzip-stream": "^0.3.4",
     "vscode-languageserver-protocol": "^3.17.5"
   }
 }
