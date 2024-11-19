@@ -83,9 +83,11 @@ export class RoslynLanguageServer {
     }
 
     if (chosen.action !== 'skip') {
-      await downloadServer(this._context, latestVersion);
       if (chosen.action === 'updateAndRestart') {
+        await downloadServer(this._context, latestVersion, true);
         await this.restart();
+      } else {
+        await downloadServer(this._context, latestVersion, false);
       }
     }
     this._context.globalState.update('roslyn.lastCheckUpdate', now);

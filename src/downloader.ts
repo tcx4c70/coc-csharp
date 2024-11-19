@@ -81,7 +81,16 @@ export async function getLatestVersion(): Promise<string> {
     return latestVersion[0].normalizedVersion;
 }
 
-export async function downloadServer(context: ExtensionContext, version: string): Promise<void> {
+function removeOldVersions(serverRootPath: string, newVersion: string) {
+    const versions = fs.readdirSync(serverRootPath);
+    for (const version of versions) {
+        if (version !== newVersion) {
+            fs.rmSync(path.join(serverRootPath, version), { recursive: true, force: true });
+        }
+    }
+}
+
+export async function downloadServer(context: ExtensionContext, version: string, removeOld: boolean = true): Promise<void> {
     // REST API: https://learn.microsoft.com/en-us/rest/api/azure/devops/artifactspackagetypes/nuget/download-package?view=azure-devops-rest-7.1
     const runtime = getRuntimeIdentifier();
     const packageName = `Microsoft.CodeAnalysis.LanguageServer.${runtime}`;
@@ -117,8 +126,9 @@ export async function downloadServer(context: ExtensionContext, version: string)
     });
 
     context.globalState.update('roslyn.version', version);
-
-    // TODO: Remove all other dirs under serverRootPath? <2024-11-19, Adam Tao> //
+    if (removeOld) {
+        removeOldVersions(serverRootPath, version);
+    }
 
     statusItem.hide();
 }
