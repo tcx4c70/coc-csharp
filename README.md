@@ -24,6 +24,7 @@ Almost all the code is taken from [vscode-csharp](https://github.com/dotnet/vsco
 | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
 | `csharp.enable`                                                           | Enable coc-csharp extension                                                                                                                                                                     | `true`                            |
 | `csharp.server.path`                                                      | Path to the Roslyn language server                                                                                                                                                              | `""`                              |
+| `csharp.server.checkUpdateDuration`                                       | Duration to check for updates of roslyn language server (only work if coc.server.path is empty)                                                                                                 | `"weekly"`                        |
 | `dotnet.typeMembers.memberInsertionLocation`                              | The insertion location of properties, events, and methods When implement interface or abstract class                                                                                            | `"withOtherMembersOfTheSameKind"` |
 | `dotnet.typeMembers.propertyGenerationBehavior`                           | Generation behavior of properties when implement interface or abstract class                                                                                                                    | `"preferThrowingProperties"`      |
 | `dotnet.codeLens.enableReferencesCodeLens`                                | Specifies whether the references CodeLens should be shown                                                                                                                                       | `true`                            |
@@ -56,7 +57,6 @@ Almost all the code is taken from [vscode-csharp](https://github.com/dotnet/vsco
 
 ## TODO
 
-- [ ] Download the Roslyn language server automatically (Only download once, but will not check for updates now)
 - [ ] Support more LSP extensions from the language server
 - [ ] Add Razor support
 

@@ -51,6 +51,46 @@ export class RoslynLanguageServer {
     this.registerSendOpenSolution();
   }
 
+  public async restart(): Promise<void> {
+    this._languageClient.restart();
+  }
+
+  public async checkUpdate() {
+    if (workspace.getConfiguration('csharp').get<string>('server.path')) {
+      return;
+    }
+
+    const lastCheck = this._context.globalState.get<number>('roslyn.lastCheckUpdate', 0);
+    const now = Date.now();
+    if (now - lastCheck < getUpdateDuration()) {
+      return;
+    }
+
+    const latestVersion = await getLatestVersion();
+    const currentVersion = this._context.globalState.get<string>('roslyn.version');
+    if (latestVersion === currentVersion) {
+      return;
+    }
+
+    const chosen = await window.showInformationMessage(
+      `New version ${latestVersion} of roslyn server is available, do you want to update?`,
+      { title: 'Update and restart the server', action: 'updateAndRestart' },
+      { title: 'Update but do not restart the server', action: 'update' },
+      { title: 'Skip this time', action: 'skip' },
+    );
+    if (!chosen) {
+      return;
+    }
+
+    if (chosen.action !== 'skip') {
+      await downloadServer(this._context, latestVersion);
+      if (chosen.action === 'updateAndRestart') {
+        await this.restart();
+      }
+    }
+    this._context.globalState.update('roslyn.lastCheckUpdate', now);
+  }
+
   public async openSolution(solutionFile: Uri): Promise<void> {
     this._solutionFile = solutionFile;
     this._projectFiles = [];
@@ -316,4 +356,21 @@ function getArguments(pluginRoot: string): string[] {
 
 function isString(value: any): value is string {
     return typeof value === 'string' || value instanceof String;
+}
+
+function getUpdateDuration(): number {
+  const duration = workspace.getConfiguration('csharp').get<string>('server.checkUpdateDuration');
+  switch (duration) {
+    case 'never':
+      return Number.MAX_VALUE;
+    case 'always':
+      return 0;
+    case 'daily':
+      return 1000 * 60 * 60 * 24;
+    case 'monthly':
+      return 1000 * 60 * 60 * 24 * 30;
+    case 'weekly':
+    default:
+      return 1000 * 60 * 60 * 24 * 7;
+  }
 }

@@ -53,6 +53,25 @@
           "default": "",
           "description": "Path to roslyn language server (note: need to be the path of the dll file instead of the executable file), e.g.: ~/.roslyn/content/LanguageServer/osx-arm64/Microsoft.CodeAnalysis.LanguageServer.dll. If it's empty, the extension will download roslyn language server and use it."
         },
+        "csharp.server.checkUpdateDuration": {
+          "type": "string",
+          "enum": [
+            "never",
+            "always",
+            "daily",
+            "weekly",
+            "monthly"
+          ],
+          "default": "weekly",
+          "enumDescriptions": [
+            "Never check for updates",
+            "Always check for updates",
+            "Check for updates daily",
+            "Check for updates weekly",
+            "Check for updates monthly"
+          ],
+          "description": "Duration to check for updates of roslyn language server (only work if coc.server.path is empty). Suggest not to set it to 'always' or 'daily' because the roslyn language server hasn't an official/stable release channel and it will release a new version frequently."
+        },
         "dotnet.typeMembers.memberInsertionLocation": {
           "type": "string",
           "enum": [

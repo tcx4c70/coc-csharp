@@ -15,4 +15,6 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
   const languageServer = await RoslynLanguageServer.initializeAsync(context);
   registerCommands(context, languageServer);
+
+  await languageServer.checkUpdate();
 }
