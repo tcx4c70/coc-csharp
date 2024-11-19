@@ -278,7 +278,7 @@ function getServerPath(): string {
 function getArguments(pluginRoot: string): string[] {
   const logPath = path.join(pluginRoot, 'logs');
   if (!fs.existsSync(logPath)) {
-    fs.mkdirSync(logPath, { recursive: true });
+    fs.mkdirSync(logPath);
   }
 
   // TODO:
