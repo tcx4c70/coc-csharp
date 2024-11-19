@@ -266,12 +266,13 @@ function getServerPath(): string {
   if (!serverPath) {
     // TODO: Download the package and use the roslyn ls in it if user doesn't configure one. <2024-11-16, Adam Tao> //
     throw new Error('Please configure the path of the roslyn language server via coc-csharp.roslynServerPath.');
+  } else {
+    let resolvedPath = workspace.expand(serverPath);
+    if (!fs.existsSync(resolvedPath)) {
+      throw new Error(`The roslyn language server path ${serverPath} doesn't exist.`);
+    }
+    return resolvedPath;
   }
-
-  if (!fs.existsSync(serverPath)) {
-    throw new Error(`The roslyn language server path ${serverPath} doesn't exist.`);
-  }
-  return serverPath;
 }
 
 function getArguments(pluginRoot: string): string[] {
