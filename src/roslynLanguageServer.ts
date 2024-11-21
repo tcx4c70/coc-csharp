@@ -26,7 +26,7 @@ import {
 import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
 import { readConfigurations } from './configurationMiddleware';
-import { getRuntimeIdentifier, getLatestVersion, downloadServer } from './downloader';
+import { AzureDevOpsPackageDownloader, RoslynLanguageServerPackage } from './downloader';
 
 export class RoslynLanguageServer {
   /**
@@ -66,7 +66,9 @@ export class RoslynLanguageServer {
       return;
     }
 
-    const latestVersion = await getLatestVersion();
+    const roslynPackage = new RoslynLanguageServerPackage(this._context);
+    const downloader = new AzureDevOpsPackageDownloader(this._context, roslynPackage);
+    const latestVersion = await downloader.getLatestVersion();
     const currentVersion = this._context.globalState.get<string>('roslyn.version');
     if (latestVersion === currentVersion) {
       return;
@@ -84,10 +86,11 @@ export class RoslynLanguageServer {
 
     if (chosen.action !== 'skip') {
       if (chosen.action === 'updateAndRestart') {
-        await downloadServer(this._context, latestVersion, true);
+        await downloader.download()
+        await downloader.removeOldVersions();
         await this.restart();
       } else {
-        await downloadServer(this._context, latestVersion, false);
+        await downloader.download();
       }
     }
     this._context.globalState.update('roslyn.lastCheckUpdate', now);
@@ -310,8 +313,9 @@ function getDownloadedServerPath(context: ExtensionContext): string | undefined 
     return undefined;
   }
 
-  const runtime = getRuntimeIdentifier();
-  const serverPath = path.join(context.storagePath, 'roslyn', version, 'content', 'LanguageServer', runtime, 'Microsoft.CodeAnalysis.LanguageServer.dll')
+  const roslynPackage = new RoslynLanguageServerPackage(context);
+  const runtime = roslynPackage.runtimeIdentifier;
+  const serverPath = path.join(roslynPackage.targetRootPath, version, 'content', 'LanguageServer', runtime, 'Microsoft.CodeAnalysis.LanguageServer.dll')
   return fs.existsSync(serverPath) ? serverPath : undefined;
 }
 
@@ -323,8 +327,9 @@ async function getServerPath(context: ExtensionContext): Promise<string> {
       return downloadedServerPath;
     }
 
-    const latestVersion = await getLatestVersion();
-    await downloadServer(context, latestVersion);
+    const roslynPackage = new RoslynLanguageServerPackage(context);
+    const downloader = new AzureDevOpsPackageDownloader(context, roslynPackage);
+    await downloader.download();
     downloadedServerPath = getDownloadedServerPath(context);
     if (!downloadedServerPath) {
       throw new Error('Failed to download the roslyn language server');
