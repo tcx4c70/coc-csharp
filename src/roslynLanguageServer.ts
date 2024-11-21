@@ -85,12 +85,10 @@ export class RoslynLanguageServer {
     }
 
     if (chosen.action !== 'skip') {
+      await downloader.download()
       if (chosen.action === 'updateAndRestart') {
-        await downloader.download()
-        await downloader.removeOldVersions();
         await this.restart();
-      } else {
-        await downloader.download();
+        await downloader.removeOldVersions();
       }
     }
     this._context.globalState.update('roslyn.lastCheckUpdate', now);
