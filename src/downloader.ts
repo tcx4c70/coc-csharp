@@ -26,7 +26,7 @@ export class RoslynLanguageServerPackage implements IAzureDevOpsPackage {
     }
 
     get project(): string {
-        return 'vs-impl';
+        return 'vside';
     }
 
     get feed(): string {
@@ -115,7 +115,7 @@ export class AzureDevOpsPackageDownloader {
         statusItem.text = `Downloading ${packageName} ${version}`;
         statusItem.show();
 
-        const url = `https://pkgs.dev.azure.com/${organization}/${organization}/_apis/packaging/feeds/${feed}/nuget/packages/${packageName}/versions/${version}/content?api-version=7.1-preview.1`
+        const url = `https://pkgs.dev.azure.com/${organization}/${project}/_apis/packaging/feeds/${feed}/nuget/packages/${packageName}/versions/${version}/content?api-version=7.1-preview.1`
         const response = await fetch(url);
         if (!response.ok) {
             statusItem.hide();
