@@ -27,6 +27,7 @@ import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
 import { readConfigurations } from './configurationMiddleware';
 import { AzureDevOpsPackageDownloader, RoslynLanguageServerPackage } from './downloader';
+import { UriConverter } from './uriConverter';
 
 export class RoslynLanguageServer {
   /**
@@ -108,12 +109,12 @@ export class RoslynLanguageServer {
 
   private async sendOpenSolutionAndProjectsNotifications(): Promise<void> {
     if (this._solutionFile !== undefined) {
-      const solution = this._solutionFile.toString();
+      const solution = UriConverter.serialize(this._solutionFile);
       await this._languageClient.sendNotification(RoslynProtocol.OpenSolutionNotification.type, {
         solution: solution
       });
     } else if (this._projectFiles.length > 0) {
-      const projects = this._projectFiles.map((project) => project.toString());
+      const projects = this._projectFiles.map(UriConverter.serialize);
       await this._languageClient.sendNotification(RoslynProtocol.OpenProjectNotification.type, {
         projects: projects,
       });
@@ -205,6 +206,9 @@ export class RoslynLanguageServer {
         workspace: {
           configuration: readConfigurations,
         },
+      },
+      uriConverter: {
+        code2Protocol: UriConverter.serialize,
       },
     };
 
