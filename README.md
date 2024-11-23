@@ -60,12 +60,6 @@ Almost all the code is taken from [vscode-csharp](https://github.com/dotnet/vsco
 - [ ] Support more LSP extensions from the language server
 - [ ] Add Razor support
 
-## Known issues
-
-- [ ] Doesn't work on Windows. coc.nvim, just like VS Code, will encode some chars in the URI, e.g. `file:///c:/Users/...` -> `file:///c%3A/Users/...`,
-  but the roslyn language server will decode it to `/c:%3A/Users/...`. Don't know it's client's or server's duty to encode/decode the URI correctly.
-  It seems that microsoft thinks it's client's duty since they skip the escaping in vscode-csharp (the client side).
-
 ## Thanks
 
 - [vscode-csharp](https://github.com/dotnet/vscode-csharp)
