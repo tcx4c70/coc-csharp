@@ -70,7 +70,7 @@ export class RoslynLanguageServer {
     const downloader = new AzureDevOpsPackageDownloader(this._context, roslynPackage);
     const latestVersion = await downloader.getLatestVersion();
     const currentVersion = this._context.globalState.get<string>('roslyn.version');
-    if (latestVersion === currentVersion) {
+    if (!currentVersion || latestVersion === currentVersion) {
       return;
     }
 
