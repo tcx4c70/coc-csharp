@@ -30,6 +30,7 @@
   "devDependencies": {
     "@types/node": "^22.9.0",
     "@types/node-fetch": "^2.6.12",
+    "@types/uuid": "^10.0.0",
     "coc.nvim": "0.0.83-next.18",
     "esbuild": "^0.19.8",
     "typescript": "^5.3.3"
@@ -299,6 +300,16 @@
         "command": "dotnet.restartServer",
         "title": "Restart Language Server",
         "category": ".NET"
+      },
+      {
+        "comamnd": "dotnet.restore.all",
+        "title": "Restore All Projects",
+        "category": ".NET"
+      },
+      {
+        "command": "dotnet.restore.project",
+        "title": "Restore Project",
+        "category": ".NET"
       }
     ]
   },
@@ -307,6 +318,7 @@
     "detect-libc": "^2.0.3",
     "node-fetch": "2.7.0",
     "unzip-stream": "^0.3.4",
+    "uuid": "^11.0.3",
     "vscode-languageserver-protocol": "^3.17.5"
   }
 }

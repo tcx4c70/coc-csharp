@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as cp from 'child_process';
 import * as net from 'net';
 import * as path from 'path';
+import * as uuid from 'uuid';
 
 import {
   LanguageClientOptions,
@@ -12,6 +13,10 @@ import {
   State,
   Uri,
   DocumentSelector,
+  ProtocolRequestType,
+  RequestType0,
+  ResponseError,
+  CancellationError,
   commands,
   services,
   window,
@@ -22,6 +27,8 @@ import {
   RAL,
   SocketMessageReader,
   SocketMessageWriter,
+  CancellationToken,
+  PartialResultParams,
 } from 'vscode-languageserver-protocol/node';
 import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
@@ -52,8 +59,62 @@ export class RoslynLanguageServer {
     this.registerSendOpenSolution();
   }
 
+  public get client(): LanguageClient {
+    return this._languageClient;
+  }
+
+  /**
+   * Returns whether or not the underlying LSP server is running or not.
+   */
+  public isRunning(): boolean {
+    return this._languageClient.state === State.Running;
+  }
+
   public async restart(): Promise<void> {
     this._languageClient.restart();
+  }
+
+  /**
+   * Makes an LSP request to the server with a given type and no parameters
+   */
+  public async sendRequest0<Response, Error>(
+    type: RequestType0<Response, Error>,
+    token: CancellationToken
+  ): Promise<Response> {
+    if (!this.isRunning()) {
+        throw new Error('Tried to send request while server is not started.');
+    }
+
+    try {
+      const response = await this._languageClient.sendRequest(type, token);
+      return response;
+    } catch (e) {
+      throw this.convertServerError(type.method, e);
+    }
+  }
+
+  public async sendRequestWithProgress<P extends PartialResultParams, R, PR, E, RO>(
+    type: ProtocolRequestType<P, R, PR, E, RO>,
+    params: P,
+    onProgress: (p: PR) => Promise<any>,
+    cancellationToken?: CancellationToken
+  ): Promise<R> {
+    // Generate a UUID for our partial result token and apply it to our request.
+    const partialResultToken: string = uuid.v4();
+    params.partialResultToken = partialResultToken;
+    // Register the callback for progress events.
+    const disposable = this._languageClient.onProgress(type, partialResultToken, async (partialResult) => {
+      await onProgress(partialResult);
+    });
+
+    try {
+      const response = await this._languageClient.sendRequest(type, params, cancellationToken);
+      return response;
+    } catch (e) {
+      throw this.convertServerError(type.method, e);
+    } finally {
+      disposable.dispose();
+    }
   }
 
   public async checkUpdate() {
@@ -121,6 +182,25 @@ export class RoslynLanguageServer {
     } else {
       return;
     }
+  }
+
+  private convertServerError(request: string, e: any): Error {
+    let error: Error;
+    if (e instanceof ResponseError && e.code === -32800) {
+      // Convert the LSP RequestCancelled error (code -32800) to a CancellationError so we can handle cancellation uniformly.
+      error = new CancellationError();
+    } else if (e instanceof Error) {
+      error = e;
+    } else if (typeof e === 'string') {
+      error = new Error(e);
+    } else {
+      error = new Error(`Unknown error: ${e.toString()}`);
+    }
+
+    if (!(error instanceof CancellationError)) {
+      this._context.logger.error(`Error making ${request} request`, error);
+    }
+    return error;
   }
 
   private registerSendOpenSolution() {

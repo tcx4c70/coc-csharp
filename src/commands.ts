@@ -8,6 +8,7 @@ import { CancellationTokenSource } from 'vscode-languageserver-protocol';
 import { RoslynLanguageServer } from './roslynLanguageServer';
 import { createLaunchTargetForSolution } from './launchTarget';
 import { UriConverter } from './uriConverter';
+import { registerRestoreCommands } from './restore';
 
 export function registerCommands(
     context: ExtensionContext,
@@ -22,6 +23,8 @@ export function registerCommands(
     context.subscriptions.push(
         commands.registerCommand('dotnet.openSolution', async () => openSolution(languageServer))
     );
+
+    registerRestoreCommands(context, languageServer);
 }
 
 /**
