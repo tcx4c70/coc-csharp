@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Command, ProtocolNotificationType } from 'coc.nvim';
+import { Command, NotificationType, ProtocolRequestType, RequestType, RequestType0, TextDocumentIdentifier, Position, FormattingOptions, InsertTextFormat, TextEdit } from 'coc.nvim';
 import * as lsp from 'vscode-languageserver-protocol';
 import { CodeAction, TextDocumentRegistrationOptions } from 'vscode-languageserver-protocol';
 // import { ProjectConfigurationMessage } from '../shared/projectConfiguration';
@@ -20,7 +20,7 @@ export interface VSProjectContext {
     _vs_is_miscellaneous: boolean;
 }
 
-export interface VSTextDocumentIdentifier extends lsp.TextDocumentIdentifier {
+export interface VSTextDocumentIdentifier extends TextDocumentIdentifier {
     _vs_projectContext: VSProjectContext | undefined;
 }
 
@@ -66,15 +66,15 @@ export interface ProjectDebugConfiguration {
 }
 
 export interface OnAutoInsertParams {
-    _vs_textDocument: lsp.TextDocumentIdentifier;
-    _vs_position: lsp.Position;
+    _vs_textDocument: TextDocumentIdentifier;
+    _vs_position: Position;
     _vs_ch: string;
-    _vs_options: lsp.FormattingOptions;
+    _vs_options: FormattingOptions;
 }
 
 export interface OnAutoInsertResponseItem {
-    _vs_textEditFormat: lsp.InsertTextFormat;
-    _vs_textEdit: lsp.TextEdit;
+    _vs_textEditFormat: InsertTextFormat;
+    _vs_textEdit: TextEdit;
 
     /**
      * An optional command that is executed *after* inserting.
@@ -108,14 +108,14 @@ export interface VSGetProjectContextParams {
     /**
      * The document the project context is being requested for.
      */
-    _vs_textDocument: lsp.TextDocumentIdentifier;
+    _vs_textDocument: TextDocumentIdentifier;
 }
 
 export interface RunTestsParams extends lsp.WorkDoneProgressParams, lsp.PartialResultParams {
     /**
      * The text document containing the tests to run.
      */
-    textDocument: lsp.TextDocumentIdentifier;
+    textDocument: TextDocumentIdentifier;
 
     /**
      * The range encompasing the test methods to run.
@@ -223,7 +223,7 @@ export interface ProjectNeedsRestoreName {
 }
 
 export interface CopilotRelatedDocumentsParams extends lsp.WorkDoneProgressParams, lsp.PartialResultParams {
-    _vs_textDocument: lsp.TextDocumentIdentifier;
+    _vs_textDocument: TextDocumentIdentifier;
     position: lsp.Position;
 }
 
@@ -232,7 +232,7 @@ export interface CopilotRelatedDocumentsReport {
 }
 
 export interface SourceGeneratorGetRequestParams {
-    textDocument: lsp.TextDocumentIdentifier;
+    textDocument: TextDocumentIdentifier;
 }
 
 export interface SourceGeneratedDocumentText {
@@ -242,7 +242,7 @@ export interface SourceGeneratedDocumentText {
 export namespace WorkspaceDebugConfigurationRequest {
     export const method = 'workspace/debugConfiguration';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.RequestType<WorkspaceDebugConfigurationParams, ProjectDebugConfiguration[], void>(
+    export const type = new RequestType<WorkspaceDebugConfigurationParams, ProjectDebugConfiguration[], void>(
         method
     );
 }
@@ -250,19 +250,19 @@ export namespace WorkspaceDebugConfigurationRequest {
 export namespace OnAutoInsertRequest {
     export const method = 'textDocument/_vs_onAutoInsert';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.RequestType<OnAutoInsertParams, OnAutoInsertResponseItem, void>(method);
+    export const type = new RequestType<OnAutoInsertParams, OnAutoInsertResponseItem, void>(method);
 }
 
 export namespace RegisterSolutionSnapshotRequest {
     export const method = 'workspace/_vs_registerSolutionSnapshot';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.RequestType0<RegisterSolutionSnapshotResponseItem, void>(method);
+    export const type = new RequestType0<RegisterSolutionSnapshotResponseItem, void>(method);
 }
 
 export namespace VSGetProjectContextsRequest {
     export const method = 'textDocument/_vs_getProjectContexts';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.RequestType<VSGetProjectContextParams, VSProjectContextList, void>(method);
+    export const type = new RequestType<VSGetProjectContextParams, VSProjectContextList, void>(method);
 }
 
 export namespace ProjectInitializationCompleteNotification {
@@ -286,7 +286,7 @@ export namespace ShowToastNotification {
 export namespace RunTestsRequest {
     export const method = 'textDocument/runTests';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.ProtocolRequestType<
+    export const type = new ProtocolRequestType<
         RunTestsParams,
         RunTestsPartialResult[],
         RunTestsPartialResult,
@@ -298,37 +298,37 @@ export namespace RunTestsRequest {
 export namespace DebugAttachRequest {
     export const method = 'workspace/attachDebugger';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.serverToClient;
-    export const type = new lsp.RequestType<DebugAttachParams, DebugAttachResult, void>(method);
+    export const type = new RequestType<DebugAttachParams, DebugAttachResult, void>(method);
 }
 
 export namespace OpenSolutionNotification {
     export const method = 'solution/open';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new ProtocolNotificationType<OpenSolutionParams, void>(method);
+    export const type = new NotificationType<OpenSolutionParams>(method);
 }
 
 export namespace OpenProjectNotification {
     export const method = 'project/open';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new ProtocolNotificationType<OpenProjectParams, void>(method);
+    export const type = new NotificationType<OpenProjectParams>(method);
 }
 
 export namespace BuildOnlyDiagnosticIdsRequest {
     export const method = 'workspace/buildOnlyDiagnosticIds';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.RequestType0<BuildOnlyDiagnosticIdsResult, void>(method);
+    export const type = new RequestType0<BuildOnlyDiagnosticIdsResult, void>(method);
 }
 
 export namespace CodeActionFixAllResolveRequest {
     export const method = 'codeAction/resolveFixAll';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.RequestType<RoslynFixAllCodeAction, RoslynFixAllCodeAction, void>(method);
+    export const type = new RequestType<RoslynFixAllCodeAction, RoslynFixAllCodeAction, void>(method);
 }
 
 export namespace RestoreRequest {
     export const method = 'workspace/_roslyn_restore';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.ProtocolRequestType<
+    export const type = new ProtocolRequestType<
         RestoreParams,
         RestorePartialResult[],
         RestorePartialResult,
@@ -340,19 +340,19 @@ export namespace RestoreRequest {
 export namespace RestorableProjects {
     export const method = 'workspace/_roslyn_restorableProjects';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.RequestType0<string[], void>(method);
+    export const type = new RequestType0<string[], void>(method);
 }
 
 export namespace ProjectNeedsRestoreRequest {
     export const method = 'workspace/_roslyn_projectNeedsRestore';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.serverToClient;
-    export const type = new lsp.RequestType<ProjectNeedsRestoreName, void, void>(method);
+    export const type = new RequestType<ProjectNeedsRestoreName, void, void>(method);
 }
 
 export namespace CopilotRelatedDocumentsRequest {
     export const method = 'copilot/_related_documents';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.ProtocolRequestType<
+    export const type = new ProtocolRequestType<
         CopilotRelatedDocumentsParams,
         CopilotRelatedDocumentsReport[],
         CopilotRelatedDocumentsReport[],
@@ -364,5 +364,5 @@ export namespace CopilotRelatedDocumentsRequest {
 export namespace SourceGeneratorGetTextRequest {
     export const method = 'sourceGeneratedDocument/_roslyn_getText';
     export const messageDirection: lsp.MessageDirection = lsp.MessageDirection.clientToServer;
-    export const type = new lsp.RequestType<SourceGeneratorGetRequestParams, SourceGeneratedDocumentText, void>(method);
+    export const type = new RequestType<SourceGeneratorGetRequestParams, SourceGeneratedDocumentText, void>(method);
 }
