@@ -36,9 +36,37 @@
   },
   "activationEvents": [
     "onLanguage:csharp",
-    "onLanguage:cs"
+    "onLanguage:cs",
+    "workspaceContains:**/*.{sln,csproj}"
   ],
   "contributes": {
+    "rootPatterns": [
+      {
+        "filetype": "cs",
+        "patterns": [
+          "*.sln"
+        ]
+      },
+      {
+        "filetype": "csharp",
+        "patterns": [
+          "*.sln"
+        ]
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          "appsettings.json",
+          "appsettings.*.json"
+        ],
+        "url": "https://json.schemastore.org/appsettings.json"
+      },
+      {
+        "fileMatch": "global.json",
+        "url": "https://json.schemastore.org/global.json"
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "coc-csharp configuration",
@@ -260,7 +288,19 @@
           "description": "Enables automatic NuGet restore if the extension detects assets are missing."
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "dotnet.openSolution",
+        "title": "Open Solution",
+        "category": ".NET"
+      },
+      {
+        "command": "dotnet.restartServer",
+        "title": "Restart Language Server",
+        "category": ".NET"
+      }
+    ]
   },
   "dependencies": {
     "coc-utils": "^0.0.17",
