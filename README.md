@@ -55,6 +55,15 @@ Almost all the code is taken from [vscode-csharp](https://github.com/dotnet/vsco
 | `dotnet.projects.binaryLogPath`                                           | Sets a path where MSBuild binary logs are written to when loading projects, to help diagnose loading errors                                                                                     | `null`                            |
 | `dotnet.projects.enableAutomaticRestore`                                  | Enables automatic NuGet restore if the extension detects assets are missing                                                                                                                     | `true`                            |
 
+## Commands
+
+| Command                   | Description               |
+| ------------------------- | ------------------------- |
+| `dotnet.openSolution`     | Open Solution             |
+| `dotnet.restartServer`    | Restart Language Server   |
+| `dotnet.restore.all`      | Restore All Projects      |
+| `dotnet.restore.project`  | Restore Project           |
+
 ## TODO
 
 - [ ] Support more LSP extensions from the language server
