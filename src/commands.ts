@@ -12,6 +12,9 @@ export function registerCommands(
     languageServer: RoslynLanguageServer,
 ) {
     context.subscriptions.push(
+        commands.registerCommand('dotnet.restartServer', languageServer.restart)
+    )
+    context.subscriptions.push(
         commands.registerCommand('dotnet.openSolution', async () => openSolution(languageServer))
     );
 }
