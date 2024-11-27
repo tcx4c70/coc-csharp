@@ -32,9 +32,9 @@ import {
 } from 'vscode-languageserver-protocol/node';
 import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
-import { readConfigurations } from './configurationMiddleware';
 import { AzureDevOpsPackageDownloader, RoslynLanguageServerPackage } from './downloader';
 import { UriConverter } from './uriConverter';
+import { readConfigurations, provideHover, resolveCompletionItem } from './middleware';
 
 export class RoslynLanguageServer {
   /**
@@ -286,6 +286,8 @@ export class RoslynLanguageServer {
         workspace: {
           configuration: readConfigurations,
         },
+        resolveCompletionItem: resolveCompletionItem,
+        provideHover: provideHover,
       },
       uriConverter: {
         code2Protocol: UriConverter.serialize,
