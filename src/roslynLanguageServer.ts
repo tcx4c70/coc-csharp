@@ -14,6 +14,7 @@ import {
   Uri,
   DocumentSelector,
   ProtocolRequestType,
+  RequestType,
   RequestType0,
   ResponseError,
   CancellationError,
@@ -72,6 +73,26 @@ export class RoslynLanguageServer {
 
   public async restart(): Promise<void> {
     this._languageClient.restart();
+  }
+
+  /**
+   * Makes an LSP request to the server with a given type and parameters.
+   */
+  public async sendRequest<Params, Response, Error>(
+      type: RequestType<Params, Response, Error>,
+      params: Params,
+      token: CancellationToken
+  ): Promise<Response> {
+    if (!this.isRunning()) {
+      throw new Error('Tried to send request while server is not started.');
+    }
+
+    try {
+      const response = await this._languageClient.sendRequest(type, params, token);
+      return response;
+    } catch (e) {
+      throw this.convertServerError(type.method, e);
+    }
   }
 
   /**

@@ -9,6 +9,7 @@ import { RoslynLanguageServer } from './roslynLanguageServer';
 import { createLaunchTargetForSolution } from './launchTarget';
 import { UriConverter } from './uriConverter';
 import { registerRestoreCommands } from './restore';
+import { registerCodeActionFixAllCommands } from './fixAllCodeAction';
 
 export function registerCommands(
     context: ExtensionContext,
@@ -25,6 +26,7 @@ export function registerCommands(
     );
 
     registerRestoreCommands(context, languageServer);
+    registerCodeActionFixAllCommands(context, languageServer);
 }
 
 /**
