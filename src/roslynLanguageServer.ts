@@ -237,7 +237,7 @@ export class RoslynLanguageServer {
   }
 
   private async openDefaultSolutionOrProjects(): Promise<void> {
-    const defaultSolution = workspace.getConfiguration().get<string>('dotnet.defaultSolution');
+    const defaultSolution = getDefaultSolution();
     if (defaultSolution !== 'disable' && this._solutionFile === undefined) {
       if (defaultSolution !== undefined && defaultSolution !== '') {
         await this.openSolution(Uri.file(defaultSolution));
@@ -464,6 +464,26 @@ function getArguments(pluginRoot: string): string[] {
     '--extensionLogDirectory', logPath,
   ];
   return args
+}
+
+function getDefaultSolution(): string | undefined {
+  let defaultSolution = workspace.getConfiguration().get<string>('dotnet.defaultSolution');
+  if (defaultSolution === undefined || defaultSolution === '') {
+    return undefined;
+  } else if (defaultSolution === 'disable') {
+    return defaultSolution;
+  }
+  if (path.isAbsolute(defaultSolution)) {
+    return defaultSolution;
+  }
+
+  for (const folder of workspace.workspaceFolders) {
+    let defaultSolution = workspace.getConfiguration(undefined, folder).get<string>('dotnet.defaultSolution');
+    if (defaultSolution !== undefined && defaultSolution !== '' && defaultSolution !== 'disable') {
+      return path.join(Uri.parse(folder.uri).fsPath, defaultSolution);
+    }
+  }
+  return undefined;
 }
 
 function isString(value: any): value is string {
