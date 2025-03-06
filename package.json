@@ -31,7 +31,7 @@
     "@types/node": "^22.9.0",
     "@types/node-fetch": "^2.6.12",
     "@types/uuid": "^10.0.0",
-    "coc.nvim": "0.0.83-next.18",
+    "coc.nvim": "0.0.83-next.19",
     "esbuild": "^0.19.8",
     "typescript": "^5.3.3"
   },

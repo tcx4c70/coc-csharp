@@ -198,10 +198,10 @@ coc-utils@^0.0.17:
     vscode-languageserver-protocol ">=3.14.0"
     which "^2.0.2"
 
-coc.nvim@0.0.83-next.18:
-  version "0.0.83-next.18"
-  resolved "https://registry.yarnpkg.com/coc.nvim/-/coc.nvim-0.0.83-next.18.tgz#932c273e83ec332f91972c1c37d5da79d62f5ab0"
-  integrity sha512-BZ1a+lnvQ/l7WzoRy97oYubDnYkX+vyAN2GhrKzWMc4d8YujOcOCjaeRv6Ogn7Bvoc5rM9X88CPuOoE0iP1ceQ==
+coc.nvim@0.0.83-next.19:
+  version "0.0.83-next.19"
+  resolved "https://registry.yarnpkg.com/coc.nvim/-/coc.nvim-0.0.83-next.19.tgz#b436277ecf6a459f1c0c9292357c4ce4733c5d49"
+  integrity sha512-OuIti7VPDecpaumEx+2M7v6G0SCOIxskbMKPD3G0b3z+3lqx/fzP/WJvDdPJTJ6LvEimlmvIsRKWoyTncqhmHg==
 
 combined-stream@^1.0.8:
   version "1.0.8"
