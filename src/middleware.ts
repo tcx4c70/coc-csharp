@@ -2,13 +2,18 @@ import {
     CancellationToken,
     CompletionItem,
     ConfigurationParams,
+    DocumentRangeSemanticTokensSignature,
+    DocumentSemanticsTokensSignature,
     MarkupContent,
     Position,
     ProvideHoverSignature,
+    Range,
     ResolveCompletionItemSignature,
     TextDocument,
+    window,
     workspace
 } from "coc.nvim";
+import { RoslynLanguageServer } from "./roslynLanguageServer";
 import { convertServerOptionNameToClientConfigurationName } from "./optionNameConverter";
 import { readEquivalentVimConfiguration } from "./universalEditorConfigProvider";
 
@@ -80,4 +85,69 @@ export async function resolveCompletionItem(item: CompletionItem, token: Cancell
 
     itemResolved.documentation.value = convertMarkupContent(itemResolved.documentation.value);
     return itemResolved;
+}
+
+let semanticTokenBlackList: number[] | undefined = undefined;
+function getSemanticTokenBlackList(languageServer: RoslynLanguageServer): number[] {
+    if (semanticTokenBlackList !== undefined) {
+        return semanticTokenBlackList;
+    }
+
+    let semanticTokenNameBlackList = workspace.getConfiguration().get<string[]>("csharp.semanticHighlighting.blackList");
+    if (semanticTokenNameBlackList === undefined) {
+        semanticTokenNameBlackList = [];
+    }
+
+    let blackList: number[] = [];
+    languageServer.client.initializeResult?.capabilities.semanticTokensProvider?.legend?.tokenTypes.forEach((tokenType, index) => {
+        if (semanticTokenNameBlackList.includes(tokenType)) {
+            blackList.push(index);
+        }
+    });
+    semanticTokenBlackList = blackList;
+    return semanticTokenBlackList;
+}
+
+function filterSemanticTokens(languageServer: RoslynLanguageServer, tokens: number[]): number[] {
+    let tokenTypeBlackList = getSemanticTokenBlackList(languageServer);
+    let filteredTokends: number[] = [];
+    let deltaLine: number = 0;
+    let deltaStart: number = 0;
+    for (let i = 0; i < tokens.length; i += 5) {
+        // Note: If the current token and the previous token are not on the same line, deltaStart is relative to 0.
+        // Hence we can't just sum them up, we need to reset deltaStart if deltaLine is not 0.
+        // https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_semanticTokens
+        deltaLine += tokens[i];
+        deltaStart = tokens[i] == 0 ? deltaStart + tokens[i + 1] : tokens[i + 1];
+        if (!tokenTypeBlackList.includes(tokens[i + 3])) {
+            filteredTokends.push(deltaLine);
+            filteredTokends.push(deltaStart);
+            filteredTokends.push(tokens[i + 2]);
+            filteredTokends.push(tokens[i + 3]);
+            filteredTokends.push(tokens[i + 4]);
+            deltaLine = 0;
+            deltaStart = 0;
+        }
+    }
+    return filteredTokends;
+}
+
+export async function provideDocumentSemanticTokens(languageServer: RoslynLanguageServer, document: TextDocument, token: CancellationToken, next: DocumentSemanticsTokensSignature) {
+    let tokens = await next(document, token);
+    if (!tokens) {
+        return tokens;
+    }
+
+    tokens.data = filterSemanticTokens(languageServer, tokens.data);
+    return tokens;
+}
+
+export async function provideDocumentRangeSemanticTokens(languageServer: RoslynLanguageServer, document: TextDocument, range: Range, token: CancellationToken, next: DocumentRangeSemanticTokensSignature) {
+    let tokens = await next(document, range, token);
+    if (!tokens) {
+        return tokens;
+    }
+
+    tokens.data = filterSemanticTokens(languageServer, tokens.data);
+    return tokens;
 }

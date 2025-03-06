@@ -35,7 +35,13 @@ import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
 import { AzureDevOpsPackageDownloader, RoslynLanguageServerPackage } from './downloader';
 import { UriConverter } from './uriConverter';
-import { readConfigurations, provideHover, resolveCompletionItem } from './middleware';
+import {
+  readConfigurations,
+  provideHover,
+  resolveCompletionItem,
+  provideDocumentSemanticTokens,
+  provideDocumentRangeSemanticTokens,
+} from './middleware';
 
 export class RoslynLanguageServer {
   /**
@@ -317,6 +323,10 @@ export class RoslynLanguageServer {
 
     const client = new LanguageClient('csharp', 'C# Language Server', serverOptions, clientOptions);
     const server = new RoslynLanguageServer(client, context);
+    if (client.clientOptions.middleware) {
+      client.clientOptions.middleware.provideDocumentSemanticTokens = (document, token, next) => provideDocumentSemanticTokens(server, document, token, next);
+      client.clientOptions.middleware.provideDocumentRangeSemanticTokens = (document, range, token, next) => provideDocumentRangeSemanticTokens(server, document, range, token, next);
+    }
 
     context.subscriptions.push(
       services.registerLanguageClient(client),
