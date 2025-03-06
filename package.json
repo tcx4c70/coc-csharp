@@ -318,7 +318,7 @@
     "detect-libc": "^2.0.3",
     "node-fetch": "2.7.0",
     "unzip-stream": "^0.3.4",
-    "uuid": "^11.0.3",
+    "uuid": "^11.1.0",
     "vscode-languageserver-protocol": "^3.17.5"
   }
 }
