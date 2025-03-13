@@ -465,12 +465,11 @@ function getArguments(pluginRoot: string): string[] {
     fs.mkdirSync(logPath);
   }
 
-  // TODO:
-  // 1. Make the log level configurable.
-  // 2. Add more args (razor, etc.)
+  const logLevel = workspace.getConfiguration('csharp').get<string>('server.logLevel', 'Information');
+  // TODO: Add more args (razor, etc.)
   // <2024-11-16, Adam Tao>
   let args: string[] = [
-    '--logLevel', 'Information',
+    '--logLevel', logLevel,
     '--extensionLogDirectory', logPath,
   ];
   return args

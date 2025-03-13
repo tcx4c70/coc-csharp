@@ -82,6 +82,20 @@
           "default": "",
           "description": "Path to roslyn language server (note: need to be the path of the dll file instead of the executable file), e.g.: ~/.roslyn/content/LanguageServer/osx-arm64/Microsoft.CodeAnalysis.LanguageServer.dll. If it's empty, the extension will download roslyn language server and use it."
         },
+        "csharp.server.logLevel": {
+          "type": "string",
+          "enum": [
+            "Trace",
+            "Debug",
+            "Information",
+            "Warning",
+            "Error",
+            "Critical",
+            "None"
+          ],
+          "default": "Information",
+          "description": "Log level of roslyn language server. The default value is 'Information'."
+        },
         "csharp.server.checkUpdateDuration": {
           "type": "string",
           "enum": [
