@@ -74,7 +74,7 @@ export class RoslynLanguageServer {
    * Returns whether or not the underlying LSP server is running or not.
    */
   public isRunning(): boolean {
-    return this._languageClient.state === State.Running;
+    return this._languageClient.getPublicState() === State.Running;
   }
 
   public async restart(): Promise<void> {
@@ -350,11 +350,11 @@ export class RoslynLanguageServer {
     };
     let childProcess: cp.ChildProcess = cp.spawn(dotnet, args, cpOptions);
 
-    childProcess.stdout.on('data', (data: { toString: (arg0: any) => any }) => {
+    childProcess.stdout?.on('data', (data: { toString: (arg0: any) => any }) => {
       const result: string = isString(data) ? data : data.toString('utf-8');
       context.logger.info('stdout: ' + result);
     });
-    childProcess.stderr.on('data', (data: { toString: (arg0: any) => any }) => {
+    childProcess.stderr?.on('data', (data: { toString: (arg0: any) => any }) => {
       const result: string = isString(data) ? data : data.toString('utf-8');
       context.logger.error('stderr: ' + result);
     });
@@ -380,7 +380,7 @@ export class RoslynLanguageServer {
       // and listen for the server to pass back the connection information via stdout.
       const namedPipePromise = new Promise<NamedPipeInformation>((resolve) => {
         context.logger.debug('Waiting for named pipe information from server...');
-        childProcess.stdout.on('data', (data: { toString: (arg0: any) => any }) => {
+        childProcess.stdout?.on('data', (data: { toString: (arg0: any) => any }) => {
           const result: string = isString(data) ? data : data.toString('utf-8');
           // Use the regular expression to find all JSON lines
           const jsonLines = result.match(RoslynLanguageServer.namedPipeKeyRegex);

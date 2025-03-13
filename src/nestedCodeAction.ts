@@ -40,7 +40,7 @@ async function registerNestedResolveCodeAction(
                 }
 
                 if (selectedAction.data.FixAllFlavors) {
-                    await getFixAllResponse(selectedAction.data, languageServer, outputChannel);
+                    await getFixAllResponse(selectedAction.data, languageServer);
                     return;
                 }
 
