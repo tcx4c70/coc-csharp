@@ -337,7 +337,7 @@
   },
   "dependencies": {
     "coc-utils": "^0.0.17",
-    "detect-libc": "^2.0.3",
+    "detect-libc": "^2.0.4",
     "node-fetch": "2.7.0",
     "unzip-stream": "^0.3.4",
     "uuid": "^11.1.0",
