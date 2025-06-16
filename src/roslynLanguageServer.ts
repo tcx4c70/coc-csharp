@@ -18,6 +18,7 @@ import {
   RequestType0,
   ResponseError,
   CancellationError,
+  MessageItem,
   commands,
   services,
   window,
@@ -163,7 +164,7 @@ export class RoslynLanguageServer {
       return;
     }
 
-    const chosen = await window.showInformationMessage(
+    const chosen = await showInformationMessage(
       `New version ${latestVersion} of roslyn server is available, do you want to update?`,
       { title: 'Update and restart the server', action: 'updateAndRestart' },
       { title: 'Update but do not restart the server', action: 'update' },
@@ -255,7 +256,7 @@ export class RoslynLanguageServer {
             await this.openSolution(solutionUris[0]);
           } else if (solutionUris.length > 1) {
             // We have more than one solution, so we'll prompt the user to use the picker.
-            const chosen = await window.showInformationMessage(
+            const chosen = await showInformationMessage(
               'Your workspace has multiple Visual Studio Solution files; please select one to get full IntelliSense.',
               { title: 'Choose', action: 'open' },
               { title: 'Choose and set default', action: 'openAndSetDefault' },
@@ -514,4 +515,14 @@ function getUpdateDuration(): number {
     default:
       return 1000 * 60 * 60 * 24 * 7;
   }
+}
+
+async function showInformationMessage<T extends MessageItem | string>(message: string, ...items: T[]): Promise<T | undefined> {
+  let texts = items.map(item => typeof item === 'string' ? item : item.title);
+  let res = await window.showMenuPicker(texts, {
+    content: message,
+    position: 'center',
+    borderhighlight: 'CocInfoFloat',
+  })
+  return items[res]
 }
