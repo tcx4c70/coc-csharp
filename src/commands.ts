@@ -39,10 +39,13 @@ export function registerCommands(
  */
 async function peekReferencesCallback(uriStr: string, serverPosition: Position): Promise<void> {
     const uri = UriConverter.deserialize(uriStr);
-    const textDocument = workspace.getDocument(uriStr).textDocument;
+    const textDocument = workspace.getDocument(uriStr)?.textDocument;
+    if (textDocument === undefined) {
+        return;
+    }
+
     const cancellationTokenSource = new CancellationTokenSource();
     const references = await languages.getReferences(textDocument, { includeDeclaration: true }, serverPosition, cancellationTokenSource.token);
-
     if (references && Array.isArray(references)) {
         // The references could come back after the document has moved to a new state (that may not even contain the position).
         // This is fine - the VSCode API is resilient to that scenario and will not crash.
@@ -59,7 +62,7 @@ async function openSolution(languageServer: RoslynLanguageServer): Promise<Uri |
     const launchTargets = solutionFiles.map(createLaunchTargetForSolution);
     const launchTarget = await window.showQuickPick(launchTargets, {
         matchOnDescription: true,
-        placeholder: `Select solution file`,
+        placeHolder: `Select solution file`,
     });
 
     if (launchTarget) {

@@ -75,7 +75,7 @@ export class RoslynLanguageServer {
    * Returns whether or not the underlying LSP server is running or not.
    */
   public isRunning(): boolean {
-    return this._languageClient.getPublicState() === State.Running;
+    return this._languageClient.state === State.Running;
   }
 
   public async restart(): Promise<void> {

@@ -4,13 +4,12 @@ import {
     ConfigurationParams,
     DocumentRangeSemanticTokensSignature,
     DocumentSemanticsTokensSignature,
+    LinesTextDocument,
     MarkupContent,
     Position,
     ProvideHoverSignature,
     Range,
     ResolveCompletionItemSignature,
-    TextDocument,
-    window,
     workspace
 } from "coc.nvim";
 import { RoslynLanguageServer } from "./roslynLanguageServer";
@@ -67,7 +66,7 @@ function convertMarkupContent(content: string): string {
     return content;
 }
 
-export async function provideHover(document: TextDocument, postion: Position, token: CancellationToken, next: ProvideHoverSignature) {
+export async function provideHover(document: LinesTextDocument, postion: Position, token: CancellationToken, next: ProvideHoverSignature) {
     let hover = await next(document, postion, token);
     if (!hover || !MarkupContent.is(hover.contents)) {
         return hover;
@@ -132,7 +131,7 @@ function filterSemanticTokens(languageServer: RoslynLanguageServer, tokens: numb
     return filteredTokends;
 }
 
-export async function provideDocumentSemanticTokens(languageServer: RoslynLanguageServer, document: TextDocument, token: CancellationToken, next: DocumentSemanticsTokensSignature) {
+export async function provideDocumentSemanticTokens(languageServer: RoslynLanguageServer, document: LinesTextDocument, token: CancellationToken, next: DocumentSemanticsTokensSignature) {
     let tokens = await next(document, token);
     if (!tokens) {
         return tokens;
@@ -142,7 +141,7 @@ export async function provideDocumentSemanticTokens(languageServer: RoslynLangua
     return tokens;
 }
 
-export async function provideDocumentRangeSemanticTokens(languageServer: RoslynLanguageServer, document: TextDocument, range: Range, token: CancellationToken, next: DocumentRangeSemanticTokensSignature) {
+export async function provideDocumentRangeSemanticTokens(languageServer: RoslynLanguageServer, document: LinesTextDocument, range: Range, token: CancellationToken, next: DocumentRangeSemanticTokensSignature) {
     let tokens = await next(document, range, token);
     if (!tokens) {
         return tokens;
