@@ -11,11 +11,11 @@ Almost all the code is taken from [vscode-csharp](https://github.com/dotnet/vsco
 1. Install [coc.nvim](https://github.com/neoclide/coc.nvim)
 2. Install [.NET SDK](https://dotnet.microsoft.com/download)
 3. Install Roslyn language server (Optional. If you don't specify the path via `csharp.server.path`, the extension will try to download the language server automatically)
-    1. Navigate to [this feed](https://dev.azure.com/azure-public/vside/_artifacts/feed/vs-impl), search for `Microsoft.CodeAnalysis.LanguageServer` and download the version matching your OS and architecture.
+    1. Navigate to [NuGet](https://www.nuget.org/), search for `roslyn-language-server` and download the version matching your OS and architecture, such as `roslyn-language-server.linux-x64`.
     2. Unzip the downloaded `.nupkg`
-    3. (Optional) Copy the contents of `<zip_root>/content/LanguageServer/<your_arch>` to a directory of your choice
-    3. Check if it's working by running `dotnet <root_dir>/content/LanguageServer/<your_arch>/Microsoft.CodeAnalysis.LanguageServer.dll --version`
-    4. Set `csharp.server.path` to the path of the `<root_dir>/content/LanguageServer/<your_arch>/Microsoft.CodeAnalysis.LanguageServer.dll` in your `coc-settings.json`
+    3. (Optional) Copy the contents of `<zip_root>/tools/<dotnet_version>/<your_arch>` to a directory of your choice
+    3. Check if it's working by running `dotnet <root_dir>/tools/<dotnet_version>/<your_arch>/Microsoft.CodeAnalysis.LanguageServer.dll --version`
+    4. Set `csharp.server.path` to the path of the `<root_dir>/tools/<dotnet_version>/<your_arch>/Microsoft.CodeAnalysis.LanguageServer.dll` in your `coc-settings.json`
 4. Install the extension by running `:CocInstall @tcx4c70/coc-csharp`
 
 ## Configurations
