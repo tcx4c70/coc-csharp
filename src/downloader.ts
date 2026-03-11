@@ -7,38 +7,26 @@ import * as libc from 'detect-libc';
 import * as unzip from 'unzip-stream';
 import { ExtensionContext, window } from 'coc.nvim';
 
-const apiVersion = '7.1-preview.1';
-
-export interface IAzureDevOpsPackage {
-    organization: string;
-    project: string;
-    feed: string;
+export interface INuGetPackage {
     packageName: string;
     targetRootPath: string;
+    executablePath: string;
 }
 
-export class RoslynLanguageServerPackage implements IAzureDevOpsPackage {
+export class RoslynLanguageServerPackage implements INuGetPackage {
     public constructor(private _context: ExtensionContext) {
     }
 
-    get organization(): string {
-        return 'azure-public';
-    }
-
-    get project(): string {
-        return 'vside';
-    }
-
-    get feed(): string {
-        return 'vs-impl';
-    }
-
     get packageName(): string {
-        return `Microsoft.CodeAnalysis.LanguageServer.${this.runtimeIdentifier}`;
+        return `roslyn-language-server.${this.runtimeIdentifier}`;
     }
 
     get targetRootPath(): string {
         return path.join(this._context.storagePath, 'roslyn');
+    }
+
+    get executablePath(): string {
+        return path.join('tools', 'net10.0', this.runtimeIdentifier, 'Microsoft.CodeAnalysis.LanguageServer.dll')
     }
 
     get runtimeIdentifier(): string {
@@ -66,36 +54,15 @@ export class RoslynLanguageServerPackage implements IAzureDevOpsPackage {
     }
 }
 
-// The following interfaces are extracted from the Azure DevOps REST API: https://learn.microsoft.com/en-us/rest/api/azure/devops/artifacts/artifact-details/get-packages?view=azure-devops-rest-7.1
-// Only the necessary fields are included here.
-interface AzureDevOpsPackageVersion {
-    id: string;
-    normalizedVersion: string;
-    version: string;
-    isLatest: boolean;
-    isListed: boolean;
-    storageId: string;
-    publishDate: string;
+interface NuGetPackageMetadata {
+    versions: Array<string>
 }
 
-interface AzureDevOpsPackage {
-    id: string;
-    name: string;
-    normalizedName: string;
-    protocolType: string;
-    url: string;
-    versions: Array<AzureDevOpsPackageVersion>;
-}
-
-interface AzureDevOpsPackageList {
-    count: number;
-    value: Array<AzureDevOpsPackage>;
-}
-
-export class AzureDevOpsPackageDownloader {
+export class NuGetPackageDownloader {
     private _latestVersion: string | undefined;
+    private _packageBaseAddress: string | undefined;
 
-    public constructor(private _context: ExtensionContext, private _package: IAzureDevOpsPackage) {
+    public constructor(private _context: ExtensionContext, private _package: INuGetPackage) {
     }
 
     public async getLatestVersion(): Promise<string> {
@@ -108,18 +75,16 @@ export class AzureDevOpsPackageDownloader {
     public async download(version: string | undefined = undefined): Promise<void> {
         version = version || await this.getLatestVersion();
 
-        // REST API: https://learn.microsoft.com/en-us/rest/api/azure/devops/artifactspackagetypes/nuget/download-package?view=azure-devops-rest-7.1
-        const { organization, project, feed, packageName } = this._package;
-
         const statusItem = window.createStatusBarItem(0, { progress: true });
-        statusItem.text = `Downloading ${packageName} ${version}`;
+        statusItem.text = `Downloading ${this._package.packageName} ${version}`;
         statusItem.show();
 
-        const url = `https://pkgs.dev.azure.com/${organization}/${project}/_apis/packaging/feeds/${feed}/nuget/packages/${packageName}/versions/${version}/content?api-version=7.1-preview.1`
+        const baseAddress = await this.getPackageBaseAddress();
+        const url = `${baseAddress}${this._package.packageName.toLowerCase()}/${version}/${this._package.packageName.toLowerCase()}.${version}.nupkg`;
         const response = await fetch(url);
         if (!response.ok) {
             statusItem.hide();
-            throw new Error(`Failed to download package ${packageName} ${version}: ${response.statusText}`);
+            throw new Error(`Failed to download package ${this._package.packageName} ${version}: ${response.statusText}`);
         }
 
         let downloadSize = 0;
@@ -127,7 +92,7 @@ export class AzureDevOpsPackageDownloader {
         response.body.on('data', (chunk: Buffer) => {
             downloadSize += chunk.length;
             const process = ((downloadSize / len) * 100).toFixed(2);
-            statusItem.text = `Downloading ${packageName} ${version} ${process}%`;
+            statusItem.text = `Downloading ${this._package.packageName} ${version} ${process}%`;
         });
 
         const downloadPath = path.join(this._package.targetRootPath, version);
@@ -162,23 +127,39 @@ export class AzureDevOpsPackageDownloader {
         }
     }
 
+    private async getPackageBaseAddress(): Promise<string> {
+        if (this._packageBaseAddress === undefined) {
+            this._packageBaseAddress = await this.fetchPackageBaseAddress();
+        }
+        return this._packageBaseAddress;
+    }
+
     private async fetchLatestVersion(): Promise<string> {
-        // REST API: https://learn.microsoft.com/en-us/rest/api/azure/devops/artifacts/artifact-details/get-packages?view=azure-devops-rest-7.1
-        const { organization, project, feed, packageName } = this._package;
-        const url = `https://feeds.dev.azure.com/${organization}/${project}/_apis/packaging/feeds/${feed}/packages?packageNameQuery=${packageName}&api-version=${apiVersion}`;
+        const baseAddress = await this.getPackageBaseAddress();
+        const url = `${baseAddress}${this._package.packageName.toLowerCase()}/index.json`;
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`Failed to fetch latest version: ${response.statusText}`);
         }
 
-        const packages: AzureDevOpsPackageList = await response.json();
-        if (packages.count === 0) {
-            throw new Error(`No packages found: ${packageName}`);
+        const metadata: NuGetPackageMetadata = await response.json();
+        if (metadata.versions.length === 0) {
+            throw new Error(`No versions found: ${this._package.packageName}`);
         }
-        const latestVersion = packages.value[0].versions.filter((version) => version.isLatest);
-        if (latestVersion.length === 0) {
-            throw new Error(`No latest version found: ${packageName}`);
+        return metadata.versions[metadata.versions.length - 1];
+    }
+
+    private async fetchPackageBaseAddress(): Promise<string> {
+        const response = await fetch('https://api.nuget.org/v3/index.json');
+        if (!response.ok) {
+            throw new Error(`Failed to fetch NuGet service index: ${response.statusText}`);
         }
-        return latestVersion[0].normalizedVersion;
+
+        const serviceIndex = await response.json();
+        const baseAddressResource = serviceIndex.resources.find((resource: any) => resource['@type'] === 'PackageBaseAddress/3.0.0');
+        if (!baseAddressResource) {
+            throw new Error('PackageBaseAddress resource not found in NuGet service index');
+        }
+        return baseAddressResource['@id'];
     }
 }

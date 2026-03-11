@@ -34,7 +34,7 @@ import {
 } from 'vscode-languageserver-protocol/node';
 import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
-import { AzureDevOpsPackageDownloader, RoslynLanguageServerPackage } from './downloader';
+import { NuGetPackageDownloader, RoslynLanguageServerPackage } from './downloader';
 import { UriConverter } from './uriConverter';
 import {
   readConfigurations,
@@ -157,7 +157,7 @@ export class RoslynLanguageServer {
     }
 
     const roslynPackage = new RoslynLanguageServerPackage(this._context);
-    const downloader = new AzureDevOpsPackageDownloader(this._context, roslynPackage);
+    const downloader = new NuGetPackageDownloader(this._context, roslynPackage);
     const latestVersion = await downloader.getLatestVersion();
     const currentVersion = this._context.globalState.get<string>('roslyn.version');
     if (!currentVersion || latestVersion === currentVersion) {
@@ -430,8 +430,7 @@ function getDownloadedServerPath(context: ExtensionContext): string | undefined 
   }
 
   const roslynPackage = new RoslynLanguageServerPackage(context);
-  const runtime = roslynPackage.runtimeIdentifier;
-  const serverPath = path.join(roslynPackage.targetRootPath, version, 'content', 'LanguageServer', runtime, 'Microsoft.CodeAnalysis.LanguageServer.dll')
+  const serverPath = path.join(roslynPackage.targetRootPath, version, roslynPackage.executablePath)
   return fs.existsSync(serverPath) ? serverPath : undefined;
 }
 
@@ -444,7 +443,7 @@ async function getServerPath(context: ExtensionContext): Promise<string> {
     }
 
     const roslynPackage = new RoslynLanguageServerPackage(context);
-    const downloader = new AzureDevOpsPackageDownloader(context, roslynPackage);
+    const downloader = new NuGetPackageDownloader(context, roslynPackage);
     await downloader.download();
     downloadedServerPath = getDownloadedServerPath(context);
     if (!downloadedServerPath) {
