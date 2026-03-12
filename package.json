@@ -38,20 +38,22 @@
   "activationEvents": [
     "onLanguage:csharp",
     "onLanguage:cs",
-    "workspaceContains:**/*.{sln,csproj}"
+    "workspaceContains:**/*.{sln,slnx,csproj}"
   ],
   "contributes": {
     "rootPatterns": [
       {
         "filetype": "cs",
         "patterns": [
-          "*.sln"
+          "*.sln",
+          "*.slnx"
         ]
       },
       {
         "filetype": "csharp",
         "patterns": [
-          "*.sln"
+          "*.sln",
+          "*.slnx"
         ]
       }
     ],

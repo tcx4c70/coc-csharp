@@ -58,7 +58,7 @@ async function openSolution(languageServer: RoslynLanguageServer): Promise<Uri |
         return undefined;
     }
 
-    const solutionFiles = await workspace.findFiles('**/*.{sln,slnf}');
+    const solutionFiles = await workspace.findFiles('**/*.{sln,slnf,slnx}');
     const launchTargets = solutionFiles.map(createLaunchTargetForSolution);
     const launchTarget = await window.showQuickPick(launchTargets, {
         matchOnDescription: true,
