@@ -34,7 +34,7 @@ import {
 } from 'vscode-languageserver-protocol/node';
 import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
-import { NuGetPackageDownloader, RoslynLanguageServerPackage } from './downloader';
+import { getRoslynLanguageServerPackage, createDownloader } from './downloader';
 import { UriConverter } from './uriConverter';
 import {
   readConfigurations,
@@ -156,8 +156,7 @@ export class RoslynLanguageServer {
       return;
     }
 
-    const roslynPackage = new RoslynLanguageServerPackage(this._context);
-    const downloader = new NuGetPackageDownloader(this._context, roslynPackage);
+    const downloader = createDownloader(this._context);
     const latestVersion = await downloader.getLatestVersion();
     const currentVersion = this._context.globalState.get<string>('roslyn.version');
     if (!currentVersion || latestVersion === currentVersion) {
@@ -429,7 +428,7 @@ function getDownloadedServerPath(context: ExtensionContext): string | undefined 
     return undefined;
   }
 
-  const roslynPackage = new RoslynLanguageServerPackage(context);
+  const roslynPackage = getRoslynLanguageServerPackage(context);
   const serverPath = path.join(roslynPackage.targetRootPath, version, roslynPackage.executablePath)
   return fs.existsSync(serverPath) ? serverPath : undefined;
 }
@@ -442,8 +441,7 @@ async function getServerPath(context: ExtensionContext): Promise<string> {
       return downloadedServerPath;
     }
 
-    const roslynPackage = new RoslynLanguageServerPackage(context);
-    const downloader = new NuGetPackageDownloader(context, roslynPackage);
+    const downloader = createDownloader(context);
     await downloader.download();
     downloadedServerPath = getDownloadedServerPath(context);
     if (!downloadedServerPath) {

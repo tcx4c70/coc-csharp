@@ -98,6 +98,19 @@
           "default": "Information",
           "description": "Log level of roslyn language server. The default value is 'Information'."
         },
+        "csharp.server.releaseChannel": {
+          "type": "string",
+          "enum": [
+            "stable",
+            "preview"
+          ],
+          "default": "stable",
+          "enumDescriptions": [
+            "Use the latest stable version of roslyn-language-server.",
+            "Use the latest preview version of roslyn-language-server. It might be unstable but will have the latest features and fixes."
+          ],
+          "description": "Release channel of roslyn language server (only work if coc.server.path is empty). The default value is 'stable'."
+        },
         "csharp.server.checkUpdateDuration": {
           "type": "string",
           "enum": [
