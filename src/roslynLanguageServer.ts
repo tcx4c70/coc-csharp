@@ -498,6 +498,13 @@ function isString(value: any): value is string {
 }
 
 function getUpdateDuration(): number {
+  const releaseChannel = workspace.getConfiguration('csharp').get<string>('server.releaseChannel');
+  if (releaseChannel != 'preview') {
+    // For stable release channel, csharp.server.checkUpdateDuration is ignored and updates will be checked on every activation,
+    // which means users will get the latest stable release as soon as it's out.
+    return 0;
+  }
+
   const duration = workspace.getConfiguration('csharp').get<string>('server.checkUpdateDuration');
   switch (duration) {
     case 'never':
