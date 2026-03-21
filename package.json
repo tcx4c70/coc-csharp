@@ -1,6 +1,6 @@
 {
   "name": "@tcx4c70/coc-csharp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "C# extension for coc.nvim",
   "author": "Adam Tao <tcx4c70@gmail.com>",
   "license": "MIT",
