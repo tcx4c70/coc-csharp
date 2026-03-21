@@ -20,7 +20,7 @@ export function registerCommands(
         commands.registerCommand('roslyn.client.peekReferences', peekReferencesCallback)
     );
     context.subscriptions.push(
-        commands.registerCommand('dotnet.restartServer', languageServer.restart)
+        commands.registerCommand('dotnet.restartServer', async () => languageServer.restart())
     )
     context.subscriptions.push(
         commands.registerCommand('dotnet.openSolution', async () => openSolution(languageServer))
