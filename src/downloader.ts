@@ -69,7 +69,7 @@ class AzureDevOpsRoslynLanguageServerPackage implements IRoslynLanguageServerPac
     }
 
     get executablePath(): string {
-        return path.join('tools', 'net10.0', this.runtimeIdentifier, 'Microsoft.CodeAnalysis.LanguageServer.dll')
+        return path.join('content', 'LanguageServer', this.runtimeIdentifier, 'Microsoft.CodeAnalysis.LanguageServer.dll')
     }
 
     get runtimeIdentifier(): string {
