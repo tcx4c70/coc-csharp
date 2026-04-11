@@ -1,14 +1,12 @@
 import * as fs from 'fs';
-import * as cp from 'child_process';
-import * as net from 'net';
 import * as path from 'path';
 import * as uuid from 'uuid';
 
 import {
   LanguageClientOptions,
   LanguageClient,
-  ServerOptions,
-  MessageTransports,
+  Executable,
+  TransportKind,
   ExtensionContext,
   State,
   Uri,
@@ -26,13 +24,9 @@ import {
 } from 'coc.nvim';
 import { DotnetResolver } from 'coc-utils';
 import {
-  RAL,
-  SocketMessageReader,
-  SocketMessageWriter,
   CancellationToken,
   PartialResultParams,
 } from 'vscode-languageserver-protocol/node';
-import { NamedPipeInformation } from './roslynProtocol';
 import * as RoslynProtocol from './roslynProtocol';
 import { getRoslynLanguageServerPackage, createDownloader } from './downloader';
 import { UriConverter } from './uriConverter';
@@ -45,11 +39,6 @@ import {
 } from './middleware';
 
 export class RoslynLanguageServer {
-  /**
-   * The regular expression used to find the named pipe key in the LSP server's stdout stream.
-   */
-  private static readonly namedPipeKeyRegex = /{"pipeName":"[^"]+"}/;
-
   /**
    * The solution file previously opened; we hold onto this so we can send this back over if the server were to be relaunched for any reason, like some other configuration
    * change that required the server to restart, or some other catastrophic failure that completely took down the process. In the case that the process is crashing because
@@ -294,9 +283,7 @@ export class RoslynLanguageServer {
   }
 
   public static async initializeAsync(context: ExtensionContext): Promise<RoslynLanguageServer> {
-    const serverOptions: ServerOptions = () => {
-      return this.startServerAsync(context);
-    }
+    const serverOptions = await this.getServerExecutableOptions(context);
 
     const outputChannel = window.createOutputChannel('csharp');
     const documentSelector: DocumentSelector = [
@@ -334,7 +321,7 @@ export class RoslynLanguageServer {
     return server;
   }
 
-  private static async startServerAsync(context: ExtensionContext): Promise<MessageTransports> {
+  private static async getServerExecutableOptions(context: ExtensionContext): Promise<Executable> {
     const dotnet = await DotnetResolver.getDotnetExecutable();
     if (!dotnet) {
       throw new Error('Could not find the dotnet executable');
@@ -343,81 +330,14 @@ export class RoslynLanguageServer {
     const serverPath = await getServerPath(context);
     let args: string[] = [ serverPath ];
     args.push(... getArguments(context.storagePath));
-    const cpOptions: cp.SpawnOptions = {
-      detached: true,
-      windowsHide: true,
-      env: process.env,
-    };
-    let childProcess: cp.ChildProcess = cp.spawn(dotnet, args, cpOptions);
-
-    childProcess.stdout?.on('data', (data: { toString: (arg0: any) => any }) => {
-      const result: string = isString(data) ? data : data.toString('utf-8');
-      context.logger.info('stdout: ' + result);
-    });
-    childProcess.stderr?.on('data', (data: { toString: (arg0: any) => any }) => {
-      const result: string = isString(data) ? data : data.toString('utf-8');
-      context.logger.error('stderr: ' + result);
-    });
-    childProcess.on('exit', (code) => {
-      context.logger.info(`The roslyn language server exited with code ${code}`);
-    });
-
-    const timeout = new Promise<undefined>((resolve) => {
-      const timeout = workspace.getConfiguration('csharp').get<number>('startTimeout') ?? 30000;
-      RAL().timer.setTimeout(resolve, timeout);
-    });
-
-    const connectionPromise = new Promise<net.Socket>((resolveConnection, rejectConnection) => {
-      // If the child process exited unexpectedly, reject the promise early.
-      // Error information will be captured from the stdout/stderr streams above.
-      childProcess.on('exit', (code) => {
-        if (code && code !== 0) {
-          rejectConnection(new Error('The roslyn language server exited unexpectedly'));
-        }
-      });
-
-      // The server process will create the named pipe used for communication. Wait for it to be created,
-      // and listen for the server to pass back the connection information via stdout.
-      const namedPipePromise = new Promise<NamedPipeInformation>((resolve) => {
-        context.logger.debug('Waiting for named pipe information from server...');
-        childProcess.stdout?.on('data', (data: { toString: (arg0: any) => any }) => {
-          const result: string = isString(data) ? data : data.toString('utf-8');
-          // Use the regular expression to find all JSON lines
-          const jsonLines = result.match(RoslynLanguageServer.namedPipeKeyRegex);
-          if (jsonLines) {
-            const transmittedPipeNameInfo: NamedPipeInformation = JSON.parse(jsonLines[0]);
-            context.logger.info('Received named pipe information from server');
-            resolve(transmittedPipeNameInfo);
-          }
-        });
-      });
-
-      const socketPromise = namedPipePromise.then(async (pipeConnectionInfo) => {
-        return new Promise<net.Socket>((resolve, reject) => {
-          context.logger.debug('Attempting to connect client to server...');
-          const socket = net.createConnection(pipeConnectionInfo.pipeName, () => {
-            context.logger.info('Client has connected to server');
-            resolve(socket);
-          });
-
-          // If we failed to connect for any reason, ensure the error is propagated.
-          socket.on('error', (err) => reject(err));
-        });
-      });
-
-      socketPromise.then(resolveConnection, rejectConnection);
-    });
-
-    // Wait for the client to connect to the named pipe.
-    let socket: net.Socket | undefined = await Promise.race([connectionPromise, timeout]);
-
-    if (socket === undefined) {
-      throw new Error('Timeout, Client could not connect to server via named pipe');
-    }
 
     return {
-      reader: new SocketMessageReader(socket),
-      writer: new SocketMessageWriter(socket),
+      command: dotnet,
+      args: args,
+      transport: TransportKind.stdio, // TODO: Can't use pipe transport for now. The pipe path might extends 104 length limit on macos (https://github.com/microsoft/vscode-languageserver-node/blob/85a9202a7778912161adc3b2915747096843cc01/jsonrpc/src/node/main.ts#L176)
+      options: {
+        detached: true
+      },
     };
   }
 }
