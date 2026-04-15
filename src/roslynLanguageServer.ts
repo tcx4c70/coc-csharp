@@ -336,7 +336,8 @@ export class RoslynLanguageServer {
       args: args,
       transport: TransportKind.stdio, // TODO: Can't use pipe transport for now. The pipe path might extends 104 length limit on macos (https://github.com/microsoft/vscode-languageserver-node/blob/85a9202a7778912161adc3b2915747096843cc01/jsonrpc/src/node/main.ts#L176)
       options: {
-        detached: true
+        detached: true,
+        shell: false,
       },
     };
   }
